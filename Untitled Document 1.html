@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Table</title>
+<style>
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    th, td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+</style>
+</head>
+<body>
+
+<table id="dataTable">
+    <thead>
+        <tr>
+            <th>S.No</th>
+            <th>Data</th>
+            <th>Order</th>
+        </tr>
+    </thead>
+    <tbody id="dataBody">
+        <!-- Table body content will be generated dynamically -->
+    </tbody>
+</table>
+
+<textarea id="dataInput" placeholder="Paste data here" rows="5" cols="50"></textarea><br>
+<button onclick="addData()">Add Data</button>
+<br><br>
+<label for="filter">Filter by Order:</label>
+<select id="filter" onchange="filterData()">
+    <option value="all">All</option>
+</select>
+
+<script>
+    var orderMap = {};
+    var order = 1;
+
+    // Function to populate the table with data and ranks
+    function populateTable(data) {
+        var tableBody = document.getElementById("dataBody");
+        tableBody.innerHTML = "";
+        orderMap = {};
+        order = 1;
+
+        // Count occurrences of each value
+        var occurrences = {};
+        data.forEach(function(item) {
+            occurrences[item] = (occurrences[item] || 0) + 1;
+        });
+
+        // Populate the table with data and marks
+        data.forEach(function(item, index) {
+            var row = document.createElement("tr");
+            var serialNumberCell = document.createElement("td");
+            var dataCell = document.createElement("td");
+            var markCell = document.createElement("td");
+
+            serialNumberCell.textContent = index + 1;
+            dataCell.textContent = item;
+
+            if (occurrences[item] > 1) {
+                if (!orderMap[item]) {
+                    orderMap[item] = order++;
+                }
+                markCell.textContent = orderMap[item];
+            } else {
+                markCell.textContent = "not dup";
+            }
+
+            row.appendChild(serialNumberCell);
+            row.appendChild(dataCell);
+            row.appendChild(markCell);
+
+            tableBody.appendChild(row);
+        });
+
+        // Populate filter dropdown
+        var filterSelect = document.getElementById("filter");
+        filterSelect.innerHTML = "<option value='all'>All</option>";
+        for (var key in orderMap) {
+            filterSelect.innerHTML += "<option value='" + orderMap[key] + "'>" + orderMap[key] + "</option>";
+        }
+    }
+
+    // Function to add data to the table
+    function addData() {
+        var dataInput = document.getElementById("dataInput");
+        var newData = dataInput.value.trim().split('\n');
+        if (newData.length > 0) {
+            populateTable(newData);
+        }
+    }
+
+    // Function to filter data by order
+    function filterData() {
+        var filterValue = document.getElementById("filter").value;
+        var rows = document.getElementById("dataTable").getElementsByTagName("tr");
+        for (var i = 1; i < rows.length; i++) { // start from 1 to skip header row
+            var cells = rows[i].getElementsByTagName("td");
+            var orderCell = cells[2];
+            if (filterValue === "all" || orderCell.textContent === filterValue) {
+                rows[i].style.display = "";
+            } else {
+                rows[i].style.display = "none";
+            }
+        }
+    }
+</script>
+
+</body>
+</html>
+
